@@ -98,19 +98,28 @@ def clean_fig(fig, height=320):
 # DATA (with a clear error message instead of a raw traceback if a
 # CSV is missing from the folder)
 # ==================================================================
+# Resolve paths relative to THIS FILE's location, not the process's working
+# directory. Streamlit Cloud runs the app with the working directory set to
+# the repo root regardless of which subfolder app.py lives in, so bare
+# filenames like "walmart_cleaned.csv" silently fail to resolve if app.py
+# isn't at the repo root. Building paths off __file__ makes this work no
+# matter where the app folder sits in the repo.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 REQUIRED_FILES = ["walmart_cleaned.csv", "forecast_next_12_weeks.csv",
                    "model_evaluation_metrics.csv", "actual_vs_predicted_holdout.csv"]
 
 
 @st.cache_data
 def load_data():
-    missing = [f for f in REQUIRED_FILES if not os.path.exists(f)]
+    paths = {f: os.path.join(BASE_DIR, f) for f in REQUIRED_FILES}
+    missing = [f for f, p in paths.items() if not os.path.exists(p)]
     if missing:
         raise FileNotFoundError(missing)
-    history = pd.read_csv("walmart_cleaned.csv", parse_dates=["Date"])
-    forecast = pd.read_csv("forecast_next_12_weeks.csv", parse_dates=["Date"])
-    evaluation = pd.read_csv("model_evaluation_metrics.csv")
-    holdout = pd.read_csv("actual_vs_predicted_holdout.csv", parse_dates=["Date"])
+    history = pd.read_csv(paths["walmart_cleaned.csv"], parse_dates=["Date"])
+    forecast = pd.read_csv(paths["forecast_next_12_weeks.csv"], parse_dates=["Date"])
+    evaluation = pd.read_csv(paths["model_evaluation_metrics.csv"])
+    holdout = pd.read_csv(paths["actual_vs_predicted_holdout.csv"], parse_dates=["Date"])
     return history, forecast, evaluation, holdout
 
 
