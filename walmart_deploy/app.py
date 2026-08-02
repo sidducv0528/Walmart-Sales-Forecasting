@@ -50,10 +50,43 @@ st.markdown("""
     font-size: 11px; font-weight: 700; letter-spacing: 1px; opacity: 0.55;
     margin-top: 6px;
 }
+.hero {
+    background: linear-gradient(120deg, #0071CE 0%, #0059a3 100%);
+    border-radius: 16px; padding: 26px 28px; margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 14px;
+}
+.hero * { color: #ffffff !important; }
+.hero-title { font-size: 28px; font-weight: 800; margin: 0; }
+.hero-sub { font-size: 14px; opacity: 0.9; margin-top: 2px; }
+.hero-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.hero-badge {
+    background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600;
+}
 </style>
 """, unsafe_allow_html=True)
 
 PLOTLY_TEMPLATE = "plotly_white"
+
+# ------------------------------------------------------------------
+# BRAND MARK
+# An original icon (rising bars inside a rounded storefront frame) --
+# not a reproduction of any company's trademarked logo. Pairs with the
+# Walmart-blue / gold accent colors already used across the dashboard.
+# ------------------------------------------------------------------
+BRAND_MARK_SVG = """
+<svg width="38" height="38" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="38" height="38" rx="10" fill="#0071CE"/>
+  <rect x="9"  y="21" width="5" height="10" rx="1.5" fill="#ffffff"/>
+  <rect x="17.5" y="15" width="5" height="16" rx="1.5" fill="#ffffff"/>
+  <rect x="26" y="9"  width="5" height="22" rx="1.5" fill="#FFC220"/>
+  <path d="M9 17 L17 11 L23 14 L31 6" stroke="#FFC220" stroke-width="2.2"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M26 6 L31 6 L31 11" stroke="#FFC220" stroke-width="2.2"
+        fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+"""
 
 
 def money(v):
@@ -143,10 +176,13 @@ years_all = sorted(history["Year"].unique())
 # SIDEBAR
 # ==================================================================
 with st.sidebar:
-    st.markdown("""
-    <div style="margin-bottom: 4px;">
-        <span class="brand-title">Walmart</span><br>
-        <span class="brand-sub">Sales Forecasting</span>
+    st.markdown(f"""
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom: 4px;">
+        {BRAND_MARK_SVG}
+        <div>
+            <span class="brand-title">Walmart</span><br>
+            <span class="brand-sub">Sales Forecasting</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     st.write("")
@@ -223,8 +259,23 @@ with st.sidebar:
 # PAGE: HOME
 # ==================================================================
 if page == "Home":
-    st.title("Walmart Sales Forecasting Dashboard")
-    st.caption("Explore Walmart weekly sales data and forecast future sales using a SARIMA model.")
+    st.markdown(f"""
+    <div class="hero">
+        <div style="display:flex; align-items:center; gap:16px;">
+            {BRAND_MARK_SVG}
+            <div>
+                <p class="hero-title">Walmart Sales Forecasting Dashboard</p>
+                <p class="hero-sub">Explore weekly sales data and forecast the next 12 weeks with a SARIMA model, store by store.</p>
+            </div>
+        </div>
+        <div class="hero-badges">
+            <span class="hero-badge">🐍 Python</span>
+            <span class="hero-badge">📈 SARIMAX</span>
+            <span class="hero-badge">⚡ Streamlit</span>
+            <span class="hero-badge">45 Stores</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     if filtered.empty:
         st.warning("No data matches the current filters. Try widening the date range or store/year selection.")
