@@ -182,6 +182,22 @@ with st.sidebar:
     st.caption("Tip: switch Light/Dark from the ⋮ menu (top right) → Settings → Theme. "
                "That's Streamlit's native toggle and re-themes every widget consistently.")
 
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align:center; padding-top: 2px; line-height: 2;">
+        <a href="https://github.com/sidducv0528" target="_blank" style="text-decoration:none; margin: 0 6px; color:#0071CE; font-weight:600; font-size:13px;">
+            🔗 GitHub
+        </a>
+        <a href="https://linkedin.com/in/siddu-data/" target="_blank" style="text-decoration:none; margin: 0 6px; color:#0071CE; font-weight:600; font-size:13px;">
+            💼 LinkedIn
+        </a>
+        <br>
+        <a href="mailto:sidducv0528@gmail.com" style="text-decoration:none; margin: 0 6px; color:#0071CE; font-weight:600; font-size:13px;">
+            ✉️ sidducv0528@gmail.com
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
+
 # Apply filters -> filtered history used across Home / EDA / Store Analysis
 filtered = history.copy()
 if sel_store != "All Stores":
@@ -503,4 +519,7 @@ else:
           inventory planning is more effective than a one-size-fits-all approach.
 
         Built by Siddu — B.Sc. Mathematics, Statistics & Data Science.
+
+        ---
+        **Connect with me:** [GitHub](https://github.com/sidducv0528) · [LinkedIn](https://linkedin.com/in/siddu-data/) · [Kaggle](https://kaggle.com/sidduv0528) · [Email](mailto:sidducv0528@gmail.com)
         """)
