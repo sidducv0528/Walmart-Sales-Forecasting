@@ -1,4 +1,6 @@
 import os
+import re
+import textwrap
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -10,6 +12,19 @@ warnings.filterwarnings("ignore")
 
 st.set_page_config(page_title="Walmart Sales Forecasting", page_icon="🛒",
                     layout="wide", initial_sidebar_state="expanded")
+
+
+def html(content):
+    """Render a raw-HTML string via st.markdown, safely.
+
+    Multi-line HTML written inside indented Python blocks inherits that
+    indentation as literal leading whitespace in the string. CommonMark
+    (Streamlit's markdown parser) treats 4+ leading spaces on a line as
+    an INDENTED CODE BLOCK -- so instead of parsing the HTML, it prints
+    the raw tags as visible text. Stripping all leading whitespace from
+    every line before handing it to st.markdown avoids that entirely.
+    """
+    st.markdown(re.sub(r"(?m)^[ \t]+", "", content), unsafe_allow_html=True)
 
 # ==================================================================
 # GLOBAL CSS
@@ -100,14 +115,15 @@ def money(v):
 
 
 def kpi_card(col, icon, title, value, sub, bg, fg):
-    col.markdown(f"""
-    <div class="kpi-card" style="background-color:{bg};">
-        <span class="kpi-icon">{icon}</span>
-        <span class="kpi-title" style="color:{fg};">{title}</span>
-        <span class="kpi-value">{value}</span>
-        <span class="kpi-sub">{sub}</span>
-    </div>
-    """, unsafe_allow_html=True)
+    with col:
+        html(f"""
+        <div class="kpi-card" style="background-color:{bg};">
+            <span class="kpi-icon">{icon}</span>
+            <span class="kpi-title" style="color:{fg};">{title}</span>
+            <span class="kpi-value">{value}</span>
+            <span class="kpi-sub">{sub}</span>
+        </div>
+        """)
 
 
 def chart_card(title):
@@ -176,7 +192,7 @@ years_all = sorted(history["Year"].unique())
 # SIDEBAR
 # ==================================================================
 with st.sidebar:
-    st.markdown(f"""
+    html(f"""
     <div style="display:flex; align-items:center; gap:10px; margin-bottom: 4px;">
         {BRAND_MARK_SVG}
         <div>
@@ -184,10 +200,10 @@ with st.sidebar:
             <span class="brand-sub">Sales Forecasting</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
     st.write("")
 
-    st.markdown('<div class="section-tag">NAVIGATION</div>', unsafe_allow_html=True)
+    html('<div class="section-tag">NAVIGATION</div>')
     page = option_menu(
         menu_title=None,
         options=["Home", "EDA Dashboard", "Store Analysis", "Sales Forecasting",
@@ -205,7 +221,7 @@ with st.sidebar:
     )
 
     st.write("")
-    st.markdown('<div class="section-tag">FILTERS</div>', unsafe_allow_html=True)
+    html('<div class="section-tag">FILTERS</div>')
 
     sel_store = st.selectbox("Select Store", ["All Stores"] + [str(s) for s in stores_all])
     sel_year = st.selectbox("Select Year", ["All Years"] + [str(y) for y in years_all])
@@ -219,7 +235,7 @@ with st.sidebar:
                "That's Streamlit's native toggle and re-themes every widget consistently.")
 
     st.markdown("---")
-    st.markdown("""
+    html("""
     <div style="text-align:center; padding-top: 2px; line-height: 2;">
         <a href="https://github.com/sidducv0528" target="_blank" style="text-decoration:none; margin: 0 6px; color:#0071CE; font-weight:600; font-size:13px;">
             🔗 GitHub
@@ -232,7 +248,7 @@ with st.sidebar:
             ✉️ sidducv0528@gmail.com
         </a>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
 # Apply filters -> filtered history used across Home / EDA / Store Analysis
 filtered = history.copy()
@@ -247,19 +263,19 @@ elif sel_holiday == "Non-Holiday":
 filtered = filtered[(filtered["Date"] >= date_range[0]) & (filtered["Date"] <= date_range[1])]
 
 with st.sidebar:
-    st.markdown(f"""
+    html(f"""
     <div class="stat-box">
         <div style="font-size:12px;font-weight:700;color:#0071CE;">📊 Total Records</div>
         <div style="font-size:24px;font-weight:800;">{len(filtered):,}</div>
         <div style="font-size:12px;">Total Stores: {filtered['Store'].nunique()}</div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
 # ==================================================================
 # PAGE: HOME
 # ==================================================================
 if page == "Home":
-    st.markdown(f"""
+    html(f"""
     <div class="hero">
         <div style="display:flex; align-items:center; gap:16px;">
             {BRAND_MARK_SVG}
@@ -275,7 +291,7 @@ if page == "Home":
             <span class="hero-badge">45 Stores</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     if filtered.empty:
         st.warning("No data matches the current filters. Try widening the date range or store/year selection.")
@@ -338,12 +354,12 @@ if page == "Home":
             fig.update_layout(xaxis_title="Month", yaxis_title="Sales")
             st.plotly_chart(clean_fig(fig), width='stretch')
 
-    st.markdown("""
+    html("""
     <div class="footer-banner">
         <div>🎯 <b>Project Objective:</b> To analyze Walmart sales data and forecast future sales for better inventory planning and decision making.</div>
         <div style="opacity:0.6;">Built with ❤️ Streamlit</div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
 # ==================================================================
 # PAGE: EDA DASHBOARD
@@ -545,7 +561,7 @@ elif page == "All Stores Forecast":
 else:
     st.title("About This Project")
     with chart_card(""):
-        st.markdown("""
+        st.markdown(textwrap.dedent("""
         ### Walmart Store Sales Forecasting — Capstone Project
 
         **Objective:** Forecast weekly sales for the next 12 weeks across all 45 Walmart stores
@@ -573,4 +589,4 @@ else:
 
         ---
         **Connect with me:** [GitHub](https://github.com/sidducv0528) · [LinkedIn](https://linkedin.com/in/siddu-data/) · [Kaggle](https://kaggle.com/sidduv0528) · [Email](mailto:sidducv0528@gmail.com)
-        """)
+        """))
