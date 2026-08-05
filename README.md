@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner/walmart-sales-forecasting-banner.png" alt="Walmart Sales Forecasting — Data Analysis + Machine Learning, predicting next 12 weeks of sales" width="100%">
+<img src="assets/screenshots/walmart-sales-forecasting-banner.png" alt="Walmart Sales Forecasting — Data Analysis + Machine Learning, predicting next 12 weeks of sales" width="100%">
 
 # 🛒 Walmart Sales Forecasting
 
@@ -129,15 +129,15 @@ apply a wider margin of error.
 
 | Home | EDA Dashboard |
 |---|---|
-| ![Home](assets/screenshots/About%20Project.png) | ![EDA](assets/screenshots/Walmart-EDA.png) |
+| ![Home](assets/screenshots/Walmart-Home.png) | ![EDA](assets/screenshots/Walmart-EDA.png) |
 
 | Store Analysis | Sales Forecasting |
 |---|---|
 | ![Store Analysis](assets/screenshots/Walmart-Store%20Analysis.png) | ![Forecast](assets/screenshots/Walmart-sales-forecast.png) |
 
-| All Stores Forecast |
-|:---:|
-| ![All Stores](assets/screenshots/Walmart%20-%20all%20stores%20forecast.png) |
+| All Stores Forecast | About Project |
+|---|---|
+| ![All Stores](assets/screenshots/Walmart%20-%20all%20stores%20forecast.png) | ![About](assets/screenshots/About%20Project.png) |
 
 ## 📂 Dataset
 
@@ -175,9 +175,7 @@ Walmart-Sales-Forecasting/
 │   └── actual_vs_predicted_holdout.csv    # holdout actual vs. predicted
 ├── data/raw/                              # copies of the raw + output CSVs
 ├── documentation/                         # written report, methodology, workflow diagram, slides
-├── assets/
-│   ├── banner/                            # README hero banner
-│   └── screenshots/                       # dashboard screenshots
+├── assets/screenshots/                    # dashboard screenshots + README banner
 ├── Demo/README.md                         # live app + video walkthrough details
 └── README.md
 ```
