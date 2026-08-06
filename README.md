@@ -22,6 +22,16 @@
 
 ---
 
+### ✨ Highlights
+
+- 📈 **45 independent SARIMA models** — one per store, not a single chain-wide average
+- 🎯 **3.66% average MAPE** — 44 of 45 stores rated Excellent (< 10% error)
+- 🖥️ **6-page interactive dashboard** — live, filterable, deployed on Streamlit Cloud
+- 🧠 **Honest modeling decisions** — exogenous variables tested and deliberately excluded, not just defaulted away
+- 📄 **Fully documented** — report, methodology, pipeline diagram, and slide deck all included
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
@@ -35,7 +45,6 @@
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Documentation](#-documentation)
-- [Future Improvements](#-future-improvements)
 - [Contact](#-contact)
 
 ---
@@ -217,13 +226,6 @@ stores takes several minutes — too slow to run on every page load.
 | [🔬 Methodology.pdf](documentation/Methodology.pdf) | Deep dive into modeling and evaluation methodology |
 | [🔄 Project_Workflow.pdf](documentation/Project_Workflow.pdf) | Visual end-to-end pipeline diagram |
 | [🖥️ Walmart_Presentation.pptx](documentation/Walmart_Presentation.pptx) | Slide deck version |
-
-## 🚧 Future Improvements
-
-- [ ] Test true SARIMAX with exogenous regressors vs. the current SARIMA baseline
-- [ ] Per-store hyperparameter tuning (`auto_arima`) instead of one fixed order
-- [ ] Investigate Store 35 specifically — the one clear underperformer
-- [ ] Automate the refresh pipeline with a scheduled job
 
 ## 📬 Contact
 
