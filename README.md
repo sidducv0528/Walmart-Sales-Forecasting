@@ -1,209 +1,195 @@
 <div align="center">
 
-<img src="assets/screenshots/walmart-sales-forecasting-banner.png" alt="Walmart Sales Forecasting — Data Analysis + Machine Learning, predicting next 12 weeks of sales" width="100%">
+![Banner](assets/screenshots/walmart-sales-forecasting-banner.png)
 
-# 🛒 Walmart Sales Forecasting
+# 🛒 Walmart Sales Forecasting Dashboard
 
-**Predicting the next 12 weeks of sales for 45 Walmart stores with seasonal time-series modeling — deployed as a live, interactive dashboard.**
+**Forecasting weekly sales for 45 Walmart stores, 12 weeks ahead — with a seasonal time-series model wrapped in a full interactive dashboard.**
 
-[![Live App](https://img.shields.io/badge/🚀_Live_App-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://walmart-sales-forecasting-stores.streamlit.app/)
-[![Video Walkthrough](https://img.shields.io/badge/▶_Watch_Demo-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/UXW4FTEN994)
+[![Live App](https://img.shields.io/badge/🚀_Live_App-Try_it_now-0071CE?style=for-the-badge)](https://walmart-sales-forecasting-stores.streamlit.app/)
+[![Watch Demo](https://img.shields.io/badge/▶️_Video-Watch_Demo-FF0000?style=for-the-badge)](https://youtu.be/UXW4FTEN994)
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white)
-![Statsmodels](https://img.shields.io/badge/statsmodels-SARIMA-2C7FB8)
-![Pandas](https://img.shields.io/badge/pandas-data%20wrangling-150458?logo=pandas&logoColor=white)
-![Plotly](https://img.shields.io/badge/Plotly-visualizations-3F4F75?logo=plotly&logoColor=white)
-![Status](https://img.shields.io/badge/status-deployed-brightgreen)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white)
+![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white)
+![statsmodels](https://img.shields.io/badge/statsmodels-SARIMA-8A5A0C?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
+*Built by [Siddu](https://github.com/sidducv0528) — B.Sc. Mathematics, Statistics & Data Science*
 
 </div>
 
-> First load can take a few seconds — Streamlit Community Cloud's free tier
-> spins containers down after inactivity.
-
 ---
 
-## 📖 Table of Contents
+## 📋 Table of Contents
 
-- [Overview](#-project-overview)
-- [Key Insights](#-key-business-insights-from-eda)
-- [Forecasting Approach](#-forecasting-approach)
-- [Results](#-results-across-all-45-stores-12-week-holdout)
+- [Overview](#-overview)
+- [Demo](#-demo)
+- [Results at a Glance](#-results-at-a-glance)
+- [Screenshots](#-screenshots)
+- [Key EDA Findings](#-key-eda-findings)
+- [Methodology](#-methodology)
 - [Dashboard Pages](#️-dashboard-pages)
-- [Preview](#-preview)
-- [Dataset](#-dataset)
-- [Repository Structure](#️-repository-structure)
-- [Why Precomputed Forecasts](#️-why-precomputed-forecasts)
 - [Tech Stack](#️-tech-stack)
-- [Run Locally](#️-run-locally)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
 - [Documentation](#-documentation)
+- [Future Improvements](#-future-improvements)
 - [Contact](#-contact)
 
 ---
 
-## 📌 Project Overview
+## 🎯 Overview
 
-Walmart operates 45 stores across different regions, each with its own sales
-pattern, holiday sensitivity, and economic environment. This project answers
-two questions for every single store:
+Walmart operates 45 stores with very different sales patterns, seasonal
+sensitivity, and economic exposure. This project builds a **store-level
+forecasting system** — not a one-size-fits-all model — that predicts each
+store's weekly sales 12 weeks into the future, evaluates its own accuracy,
+and surfaces everything through a live, filterable dashboard.
 
-1. **What drove sales historically?** — an exploratory analysis of holiday
-   effects, seasonality, temperature, CPI, fuel price, and unemployment.
-2. **What will sales look like in the next 12 weeks?** — a per-store time
-   series forecast, rigorously validated against a held-out test window
-   before being trusted for the actual future.
+> **In short:** raw sales data → EDA → 45 independent SARIMA models → accuracy
+> evaluation → interactive Streamlit app, deployed and live.
 
-The end result is deployed as a **6-page interactive dashboard**, so the
-analysis isn't locked inside a notebook — anyone can pick a store and see
-its forecast, accuracy, and business context in seconds.
-
-## 🧠 Key Business Insights (from EDA)
-
-| Insight | What it means for the business |
-|---|---|
-| 📈 **Seasonality dominates.** Sales peak sharply in Nov–Dec around Thanksgiving and Christmas. | Inventory and staffing should ramp up ahead of the holiday season. |
-| 📉 **Macro indicators are weak predictors overall.** Unemployment, CPI, and temperature each correlate weakly with sales chain-wide. | A handful of stores *are* noticeably more sensitive to unemployment or CPI — planning should be store-specific, not one-size-fits-all. |
-| ✅ **Outliers were kept, not removed.** High-sales spikes line up with holiday weeks — real demand, not data errors. | Removing them would have erased the exact seasonal signal the model relies on. |
-| 🏪 **Performance varies widely store to store.** | Confirms the need for 45 independent models rather than one global forecast. |
-
-## 🔮 Forecasting Approach
-
-Each store's weekly sales are modeled **independently** with:
-
-```
-SARIMAX(order=(1,1,1), seasonal_order=(1,1,1,52))
-```
-
-**Why 52 as the seasonal period?** Weekly data with a yearly cycle needs a
-52-week seasonal term to capture the holiday-driven annual pattern.
-
-**Why SARIMA and not true SARIMAX?** The dataset provides exogenous features
-(`Holiday_Flag`, `CPI`, `Fuel_Price`, `Unemployment`), but they're
-deliberately **not** passed into the model as regressors:
-
-- The `(1,1,1,52)` seasonal term already captures the Nov/Dec holiday spike
-  directly, making a separate `Holiday_Flag` regressor largely redundant.
-- CPI and unemployment are slow-moving macro indicators — they shift
-  month-to-month, not week-to-week, so they add little to a 12-week-ahead
-  forecast, and the correlation analysis in the notebook backs this up.
-
-So while the `statsmodels` `SARIMAX` class is used (it supports exogenous
-inputs), no exogenous variables are actually passed in — functionally, this
-is a **seasonal ARIMA (SARIMA)** model per store.
-
-**Validation methodology:** for every store, the last 12 weeks are held out
-as a test set, the model is trained on everything before that, and its
-forecast is compared against the actual held-out values (MAE / RMSE / MAPE).
-Once validated, a second model is trained on the *complete* history per
-store to produce the genuine 12-week-ahead forecast into the future.
-
-## 🎯 Results across all 45 stores (12-week holdout)
+## 📺 Demo
 
 <div align="center">
 
-| Metric | Mean | Median | Best store | Worst store |
-|:---:|:---:|:---:|:---:|:---:|
-| **MAPE** | 3.66% | 2.84% | 🥇 1.64% (Store 37) | 14.15% (Store 35) |
-| **MAE** | $36,197 | $31,134 | $7,377 | $123,234 |
-| **RMSE** | $44,000 | $35,651 | $9,594 | $127,205 |
+[![Watch the demo](https://img.youtube.com/vi/UXW4FTEN994/maxresdefault.jpg)](https://youtu.be/UXW4FTEN994)
+
+**🔴 [Watch the full video walkthrough](https://youtu.be/UXW4FTEN994)** &nbsp;·&nbsp; **🚀 [Open the live app](https://walmart-sales-forecasting-stores.streamlit.app/)**
 
 </div>
 
-Most stores forecast within **~2–4% MAPE**; a small number of higher-variance
-stores (like Store 35) are harder to predict and are flagged as such on the
-"All Stores Forecast" dashboard page, so planners know exactly where to
-apply a wider margin of error.
+> First load on the live app can take a few seconds — Streamlit Community
+> Cloud's free tier spins containers down after inactivity.
+
+## 📊 Results at a Glance
+
+<div align="center">
+
+| 📦 Records | 🏬 Stores | 🎯 Avg. MAPE | 🏆 Best Store | ⚠️ Watch List |
+|:---:|:---:|:---:|:---:|:---:|
+| **6,435** | **45** | **3.66%** | Store 37 — 1.64% | Store 35 — 14.15% |
+
+</div>
+
+44 of 45 stores land in the **Excellent** accuracy band (< 10% MAPE) — one
+of the largest, most consistent results across the whole store network.
+
+## 📸 Screenshots
+
+<table>
+<tr>
+<td width="50%"><b>Home</b><br><img src="assets/screenshots/Walmart-Home.png" width="100%"></td>
+<td width="50%"><b>EDA Dashboard</b><br><img src="assets/screenshots/Walmart-EDA.png" width="100%"></td>
+</tr>
+<tr>
+<td width="50%"><b>Store Analysis</b><br><img src="assets/screenshots/Walmart-Store%20Analysis.png" width="100%"></td>
+<td width="50%"><b>Sales Forecasting</b><br><img src="assets/screenshots/Walmart-sales-forecast.png" width="100%"></td>
+</tr>
+<tr>
+<td width="50%"><b>All Stores Forecast</b><br><img src="assets/screenshots/Walmart%20-%20all%20stores%20forecast.png" width="100%"></td>
+<td width="50%"><b>About Project</b><br><img src="assets/screenshots/About%20Project.png" width="100%"></td>
+</tr>
+</table>
+
+## 🔍 Key EDA Findings
+
+| Finding | Detail |
+|---|---|
+| 🎄 **Seasonality dominates** | Sales peak sharply in Nov–Dec (Thanksgiving/Christmas); holiday weeks run ~7–8% higher than non-holiday weeks |
+| 📉 **Unemployment & CPI: weak signal** | Both under 0.1 correlation with sales at the aggregate level — though a handful of stores are meaningfully more sensitive |
+| 🌡️ **Temperature: minimal effect** | Correlation ≈ −0.02 — essentially no relationship with weekly sales |
+| 🏪 **Store performance varies widely** | The best store sold **7×** the volume of the worst — the core reason this project forecasts *per store*, not chain-wide |
+
+## 🧮 Methodology
+
+**Model:** `SARIMA(1,1,1)(1,1,1,52)` — fit independently for **each of the 45
+stores**. The seasonal order of 52 captures the yearly weekly cycle directly,
+which drives the holiday-season spike in nearly every store.
+
+<details>
+<summary><b>📌 A note on model naming — SARIMA vs. SARIMAX (click to expand)</b></summary>
+<br>
+
+The dataset includes `Holiday_Flag`, `CPI`, and `Unemployment` as candidate
+exogenous regressors. These were tested and **deliberately excluded** as
+exogenous inputs, for two reasons backed directly by the EDA:
+
+1. **Holiday effects are already captured** by the seasonal `(…,52)` term —
+   adding `Holiday_Flag` separately would be largely redundant.
+2. **CPI and Unemployment move slowly** month-to-month and showed weak
+   correlation with weekly sales at the store level — unlikely to
+   meaningfully improve a 12-week-ahead forecast.
+
+This is implemented using statsmodels' `SARIMAX` class (which supports
+`exog` inputs), but none are passed — functionally this is a **seasonal
+ARIMA (SARIMA)** model, not true SARIMAX. Full reasoning and the correlation
+checks behind it are documented in
+[`documentation/Methodology.pdf`](documentation/Methodology.pdf).
+
+</details>
+
+**Evaluation:** the last 12 weeks of each store's history are held out as a
+test set. MAE, RMSE, and MAPE are computed per store:
+
+| MAPE | Rating |
+|:---:|:---:|
+| < 10% | 🟢 Excellent |
+| < 20% | 🟡 Good |
+| ≥ 20% | 🔴 Needs Improvement |
 
 ## 🖥️ Dashboard Pages
 
 | Page | What it shows |
 |---|---|
-| 🏠 **Home** | KPI overview, sales trends, holiday split, top 10 stores |
-| 📊 **EDA Dashboard** | Correlation analysis, seasonality, best vs. worst store |
-| 🏪 **Store Analysis** | Per-store deep dive — rank, holiday lift, economic sensitivity |
-| 🔮 **Sales Forecasting** | 12-week forecast per store, actual vs. predicted, CSV export |
-| 📋 **All Stores Forecast** | Model accuracy across all 45 stores, sorted by MAPE |
-| ℹ️ **About Project** | Project summary and methodology |
-
-## 📸 Preview
-
-| Home | EDA Dashboard |
-|---|---|
-| ![Home](assets/screenshots/Walmart-Home.png) | ![EDA](assets/screenshots/Walmart-EDA.png) |
-
-| Store Analysis | Sales Forecasting |
-|---|---|
-| ![Store Analysis](assets/screenshots/Walmart-Store%20Analysis.png) | ![Forecast](assets/screenshots/Walmart-sales-forecast.png) |
-
-| All Stores Forecast | About Project |
-|---|---|
-| ![All Stores](assets/screenshots/Walmart%20-%20all%20stores%20forecast.png) | ![About](assets/screenshots/About%20Project.png) |
-
-## 📂 Dataset
-
-Weekly sales for 45 Walmart stores, **Feb 2010 – Oct 2012** (6,435 rows).
-
-| Column | Description |
-|---|---|
-| `Store` | Store number (1–45) |
-| `Date` | Week (Friday-ending) |
-| `Weekly_Sales` | Sales for that store that week |
-| `Holiday_Flag` | 1 if the week contains a major holiday |
-| `Temperature` | Regional temperature |
-| `Fuel_Price` | Regional fuel price |
-| `CPI` | Consumer Price Index |
-| `Unemployment` | Regional unemployment rate |
-
-Raw and cleaned copies live in [`data/raw`](data/raw) and
-[`walmart_deploy/walmart_cleaned.csv`](walmart_deploy/walmart_cleaned.csv).
-
-## 🗂️ Repository Structure
-
-```
-Walmart-Sales-Forecasting/
-├── notebooks/
-│   └── _Walmart_Capstone_Project..ipynb   # full EDA + modeling notebook
-├── scripts/
-│   └── precompute.py                      # fits SARIMA for all 45 stores, writes forecast CSVs
-├── walmart_deploy/                        # deployed Streamlit app
-│   ├── app.py                             # 6-page dashboard
-│   ├── requirements.txt
-│   ├── Walmart_DataSet.csv                # source data
-│   ├── walmart_cleaned.csv                # cleaned data used by the app
-│   ├── forecast_next_12_weeks.csv         # precomputed forecasts (all stores)
-│   ├── model_evaluation_metrics.csv       # MAE / RMSE / MAPE per store
-│   └── actual_vs_predicted_holdout.csv    # holdout actual vs. predicted
-├── data/raw/                              # copies of the raw + output CSVs
-├── documentation/                         # written report, methodology, workflow diagram, slides
-├── assets/screenshots/                    # dashboard screenshots + README banner
-├── Demo/README.md                         # live app + video walkthrough details
-└── README.md
-```
-
-## ⚙️ Why Precomputed Forecasts?
-
-Fitting a weekly-seasonal SARIMA (period 52) for all 45 stores takes roughly
-**7 minutes total**. Doing that on every Streamlit rerun would make the app
-unusably slow and would time out on Streamlit Community Cloud's free tier.
-Instead, `scripts/precompute.py` runs the modeling once offline and writes
-out the forecast, evaluation, and holdout-comparison CSVs — the app just
-loads and displays them, with `@st.cache_data` keeping it fast across
-sessions.
-
-To refresh with new data: replace `Walmart_DataSet.csv`, rerun
-`python3 precompute.py` (~7 min), commit the four regenerated CSVs, and push
-— the app picks up the new data automatically on next load.
+| 🏠 **Home** | KPI overview, sales trends, holiday split, top 10 stores — filterable by store/year/holiday/date |
+| 📊 **EDA Dashboard** | Unemployment/CPI/temperature correlation, seasonality, best vs. worst store |
+| 🏬 **Store Analysis** | Per-store deep dive — rank, holiday lift, economic sensitivity, monthly seasonality |
+| 📈 **Sales Forecasting** | 12-week forecast per store, actual vs. predicted, MAE/RMSE/MAPE, CSV export |
+| 📋 **All Stores Forecast** | Model accuracy across all 45 stores, sorted MAPE chart, best/worst 5, full table |
+| ℹ️ **About Project** | Summary and methodology, right inside the app |
 
 ## 🛠️ Tech Stack
 
-| Layer | Tools |
-|---|---|
-| **Modeling** | `statsmodels` (SARIMAX), `scikit-learn` (evaluation metrics), `pandas`, `numpy` |
-| **Dashboard** | `streamlit`, `streamlit-option-menu`, `plotly` |
-| **Analysis** | Jupyter Notebook |
-| **Deployment** | Streamlit Community Cloud |
+<table>
+<tr>
+<td><b>Language</b></td><td>Python (pandas, numpy)</td>
+</tr>
+<tr>
+<td><b>Modeling</b></td><td>statsmodels — SARIMAX class, used as SARIMA</td>
+</tr>
+<tr>
+<td><b>Dashboard</b></td><td>Streamlit, Plotly, streamlit-option-menu</td>
+</tr>
+<tr>
+<td><b>Deployment</b></td><td>Streamlit Community Cloud, GitHub</td>
+</tr>
+</table>
 
-## ▶️ Run Locally
+## 📁 Project Structure
+
+```
+Walmart-Sales-Forecasting/
+├── walmart_deploy/              ← deployed app (Streamlit Cloud entry point)
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── walmart_cleaned.csv
+│   ├── forecast_next_12_weeks.csv
+│   ├── model_evaluation_metrics.csv
+│   ├── actual_vs_predicted_holdout.csv
+│   └── .streamlit/config.toml
+├── notebooks/                   ← full EDA + modeling + evaluation
+├── scripts/precompute.py        ← regenerates the 4 CSVs above
+├── data/raw/                    ← original untouched dataset
+├── documentation/                ← report, methodology, workflow, slides
+├── Demo/                        ← live app + video links
+├── assets/screenshots/          ← images used in this README
+└── .gitignore
+```
+
+## ▶️ Getting Started
 
 ```bash
 git clone https://github.com/sidducv0528/Walmart-Sales-Forecasting.git
@@ -212,29 +198,39 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-To regenerate the forecast CSVs yourself instead of using the ones already
-in the repo:
+**Refreshing the forecast with new data:**
 
 ```bash
-cd walmart_deploy
-pip install statsmodels scikit-learn
-python3 ../scripts/precompute.py
+cd scripts
+python precompute.py     # regenerates all 4 output CSVs (~7-8 min)
 ```
+
+Commit and push — Streamlit Cloud redeploys automatically. Forecasts are
+precomputed rather than fit live because a 52-week seasonal SARIMA across 45
+stores takes several minutes — too slow to run on every page load.
 
 ## 📄 Documentation
 
-- 📘 [`Walmart_Project_Report.pdf`](documentation/Walmart_Project_Report.pdf) — full written report
-- 🔬 [`Methodology.pdf`](documentation/Methodology.pdf) — modeling and evaluation methodology, in depth
-- 🧭 [`Project_Workflow.pdf`](documentation/Project_Workflow.pdf) — end-to-end pipeline diagram
-- 🖼️ [`Walmart_Presentation.pptx`](documentation/Walmart_Presentation.pptx) — slide deck version
-- 🎬 [`Demo/README.md`](Demo/README.md) — live app + video walkthrough, page by page
+| Document | Purpose |
+|---|---|
+| [📘 Walmart_Project_Report.pdf](documentation/Walmart_Project_Report.pdf) | Full written report, with screenshots |
+| [🔬 Methodology.pdf](documentation/Methodology.pdf) | Deep dive into modeling and evaluation methodology |
+| [🔄 Project_Workflow.pdf](documentation/Project_Workflow.pdf) | Visual end-to-end pipeline diagram |
+| [🖥️ Walmart_Presentation.pptx](documentation/Walmart_Presentation.pptx) | Slide deck version |
+
+## 🚧 Future Improvements
+
+- [ ] Test true SARIMAX with exogenous regressors vs. the current SARIMA baseline
+- [ ] Per-store hyperparameter tuning (`auto_arima`) instead of one fixed order
+- [ ] Investigate Store 35 specifically — the one clear underperformer
+- [ ] Automate the refresh pipeline with a scheduled job
 
 ## 📬 Contact
 
 <div align="center">
 
-[![GitHub](https://img.shields.io/badge/GitHub-sidducv0528-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sidducv0528)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-siddu--data-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/siddu-data/)
+[![GitHub](https://img.shields.io/badge/GitHub-sidducv0528-181717?style=for-the-badge&logo=github)](https://github.com/sidducv0528)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-siddu--data-0A66C2?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/siddu-data/)
 [![Email](https://img.shields.io/badge/Email-sidducv0528%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:sidducv0528@gmail.com)
 
 </div>
@@ -242,5 +238,7 @@ python3 ../scripts/precompute.py
 ---
 
 <div align="center">
-<sub>⭐ If this project helped you, consider starring the repo!</sub>
+
+📄 Licensed under [MIT](LICENSE) &nbsp;·&nbsp; ⭐ If this project was useful, consider starring the repo
+
 </div>
